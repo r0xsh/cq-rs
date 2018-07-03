@@ -1,31 +1,14 @@
 pub trait Event {}
 pub struct Message;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct MessageEventData {
     pub message: String
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum MessageEvent {
     Quacked(MessageEventData)
-}
-
-impl PartialEq for MessageEvent {
-    fn eq(&self, other: &MessageEvent) -> bool {
-        match (self, other) {
-            (MessageEvent::Quacked(a), MessageEvent::Quacked(b)) => {
-                return a == b;
-            }
-        }
-    }
-}
-
-
-impl PartialEq for MessageEventData {
-    fn eq(&self, other: &MessageEventData) -> bool {
-        self.message == other.message
-    }
 }
 
 impl Message {
@@ -37,15 +20,13 @@ impl Message {
 }
 
 
-
-
 #[cfg(test)]
 mod tests {
     use super::*;
     #[test]
     fn raise_message() {
         let mut history = vec!();
-        history.push(Message::quack("coucou"));
+        history.push(Message::quack("coudcou"));
 
         assert_eq!(
             history[0],
