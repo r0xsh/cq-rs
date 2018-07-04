@@ -1,114 +1,53 @@
 extern crate uuid;
-use uuid::Uuid;
 
-pub trait Event {}
-
-#[derive(Debug)]
-pub struct Message {
-    pub uuid: Option<Uuid>,
-    pub deleted: bool,
-    pub message: String,
-}
-
-#[derive(Debug, PartialEq)]
-pub struct MessageEventData {
-    pub uuid: Uuid,
-    pub message: String,
-}
-
-#[derive(Debug, PartialEq)]
-pub enum MessageEvent {
-    Quacked(MessageEventData),
-    Deleted,
-}
-
-impl Message {
-    pub fn new(events: &Vec<MessageEvent>) -> Message {
-        let mut msg = Message::default();
-
-        for event in events {
-            msg.apply(event)
-        }
-        msg
-    }
-
-    pub fn apply(&mut self, event: &MessageEvent) {
-        match event {
-            MessageEvent::Quacked(e) => {
-                self.uuid = Some(e.uuid);
-                self.message = e.message.to_owned()
-            }
-            MessageEvent::Deleted => {
-                self.deleted = true;
-            }
-        }
-    }
-
-    pub fn default() -> Message {
-        Message {
-            uuid: None,
-            deleted: false,
-            message: String::new(),
-        }
-    }
-
-    pub fn quack(events: &mut Vec<MessageEvent>, uuid: Uuid, message: &str) {
-        events.push(MessageEvent::Quacked(MessageEventData {
-            uuid: uuid,
-            message: message.to_owned(),
-        }));
-    }
-
-    pub fn delete(&mut self, events: &mut Vec<MessageEvent>) {
-        if !self.deleted {
-            let event = MessageEvent::Deleted;
-            self.apply(&event);
-            events.push(event);
-        }
-    }
-}
+mod dto;
+mod events;
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use uuid::Uuid;
+
+    use dto::user_dto::*;
+    use events::user_events::*;
 
     #[test]
-    fn raise_message_quacked_when_quack_message() {
+    fn raise_user_created_when_create_user() {
         let uuid = Uuid::new_v4();
-        let mut history = vec![];
-        Message::quack(&mut history, uuid, "coucou");
+        let mut stream = vec![];
+        User::create(&mut stream, uuid, "Antoine");
 
         assert_eq!(
-            history[0],
-            MessageEvent::Quacked(MessageEventData {
+            stream[0],
+            UserEvent::Created(UserEventData {
                 uuid: uuid,
-                message: "coucou".to_string()
+                name: "Antoine".to_string()
             })
         )
     }
 
     #[test]
-    fn raise_message_deleted_when_delete_message() {
-        let mut history = vec![];
-        Message::quack(&mut history, Uuid::new_v4(), "coucou");
+    fn raise_user_deleted_when_delete_user() {
+        let mut stream = vec![];
+        User::create(&mut stream, Uuid::new_v4(), "Antoine");
 
-        let mut message = Message::new(&history);
-        message.delete(&mut history);
+        let mut user = User::new(&stream);
+        user.delete(&mut stream);
 
-        assert_eq!(*history.last().unwrap(), MessageEvent::Deleted);
-        assert_eq!(history.len(), 2);
+        assert_eq!(*stream.last().unwrap(), UserEvent::Deleted);
+        assert_eq!(stream.len(), 2);
     }
 
     #[test]
-    fn not_raise_message_deleted_when_delete_deleted_message() {
-        let mut history = vec![];
-        Message::quack(&mut history, Uuid::new_v4(), "coucou");
+    fn not_raise_user_deleted_when_delete_deleted_user() {
+        let mut stream = vec![];
+        User::create(&mut stream, Uuid::new_v4(), "Antoine");
 
-        let mut message = Message::new(&history);
-        message.delete(&mut history);
-        message.delete(&mut history);
+        let mut user = User::new(&stream);
+        user.delete(&mut stream);
+        user.delete(&mut stream);
 
-        assert_eq!(history.len(), 2);
+        assert_eq!(*stream.last().unwrap(), UserEvent::Deleted);
+        assert_eq!(stream.len(), 2);
     }
 
 }
