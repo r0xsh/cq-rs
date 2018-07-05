@@ -1,7 +1,2 @@
-[package]
-name = "cq-rs"
-version = "0.1.0"
-authors = ["Antoine BAGNAUD <bagnaud.antoine@gmail.com>"]
-
-[dependencies]
-uuid = { version = "0.6", features = ["v4"] }
+[workspace]
+members = ["domain/", "http/"]

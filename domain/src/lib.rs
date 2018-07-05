@@ -1,7 +1,9 @@
+#![allow(dead_code)]
+
 extern crate uuid;
 
-mod dto;
-mod events;
+pub mod dto;
+pub mod events;
 
 #[cfg(test)]
 mod tests {
@@ -30,7 +32,7 @@ mod tests {
         let mut stream = vec![];
         User::create(&mut stream, Uuid::new_v4(), "Antoine");
 
-        let mut user = User::new(&stream);
+        let mut user = User::from(&stream);
         user.delete(&mut stream);
 
         assert_eq!(*stream.last().unwrap(), UserEvent::Deleted);
@@ -42,7 +44,7 @@ mod tests {
         let mut stream = vec![];
         User::create(&mut stream, Uuid::new_v4(), "Antoine");
 
-        let mut user = User::new(&stream);
+        let mut user = User::from(&stream);
         user.delete(&mut stream);
         user.delete(&mut stream);
 

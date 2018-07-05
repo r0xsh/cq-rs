@@ -8,8 +8,8 @@ pub struct User {
     pub name: String,
 }
 
-impl User {
-    pub fn new(stream: &Vec<UserEvent>) -> User {
+impl<'a> From<&'a Vec<UserEvent>> for User {
+    fn from(stream: &Vec<UserEvent>) -> Self {
         let mut user = User::default();
 
         for event in stream {
@@ -17,7 +17,9 @@ impl User {
         }
         user
     }
+}
 
+impl User {
     pub fn apply(&mut self, event: &UserEvent) {
         match event {
             UserEvent::Created(e) => {
