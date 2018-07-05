@@ -1,10 +1,14 @@
 use events::user_events::*;
 use uuid::Uuid;
 
-#[derive(Debug)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct User {
+    #[serde(skip_deserializing)]
     pub uuid: Option<Uuid>,
+
+    #[serde(skip_deserializing)]
     pub deleted: bool,
+
     pub name: String,
 }
 
@@ -19,6 +23,16 @@ impl<'a> From<&'a Vec<UserEvent>> for User {
     }
 }
 
+impl Default for User {
+    fn default() -> Self {
+        User {
+            uuid: None,
+            deleted: false,
+            name: String::new(),
+        }
+    }
+}
+
 impl User {
     pub fn apply(&mut self, event: &UserEvent) {
         match event {
@@ -29,14 +43,6 @@ impl User {
             UserEvent::Deleted => {
                 self.deleted = true;
             }
-        }
-    }
-
-    pub fn default() -> User {
-        User {
-            uuid: None,
-            deleted: false,
-            name: String::new(),
         }
     }
 

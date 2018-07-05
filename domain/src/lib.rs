@@ -1,6 +1,9 @@
 #![allow(dead_code)]
 
 extern crate uuid;
+#[macro_use]
+extern crate serde_derive;
+extern crate serde;
 
 pub mod dto;
 pub mod events;
